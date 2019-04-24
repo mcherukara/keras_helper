@@ -12,15 +12,12 @@ import numpy as np
 
 #File I/O
 import os, glob
-import cPickle as pickle
 import glob
 import tempfile, os
 from tqdm import tqdm_notebook as tqdm
 
 #Image transforms
 import numpy as np
-import cv2
-from skimage.transform import rescale
 
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
@@ -118,7 +115,7 @@ def repeat_channels(test_data):
     		test_data[i,:,:],test_data[i,:,:],test_data[i,:,:]
 	return test_dataset3
 
-def plot_training_hist(history, n_last=5)
+def plot_training_hist(history, n_last=5):
 	hist=history
 	epochs=np.asarray(history.epoch)+1
 
@@ -157,3 +154,22 @@ def plot_training_hist(history, n_last=5)
 	#axarr[1,1].set_ylabel('Accuracy')
 	#plt.tight_layout()
 	axarr[1,1].grid()
+
+class ModelMGPU(Model):
+	def __init__(self, ser_model, gpus):
+		if gpus>1:
+			pmodel = multi_gpu_model(ser_model, gpus)
+		else:
+			pmodel = ser_model
+		self.__dict__.update(pmodel.__dict__)
+		self._smodel = ser_model
+
+	def __getattribute__(self, attrname):
+		'''Override load and save methods to be used from the serial-model. The
+		serial-model holds references to the weights in the multi-gpu model.
+		'''
+        # return Model.__getattribute__(self, attrname)
+		if 'load' in attrname or 'save' in attrname:
+			return getattr(self._smodel, attrname)
+
+		return super(ModelMGPU, self).__getattribute__(attrname)

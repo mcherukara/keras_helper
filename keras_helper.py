@@ -172,3 +172,15 @@ class ModelMGPU(Model):
 			return getattr(self._smodel, attrname)
 
 		return super(ModelMGPU, self).__getattribute__(attrname)
+
+def Conv_Pool_block(x0,nfilters,w1=3,w2=3,p1=2,p2=2, padding='same', data_format='channels_last'):
+	x0 = Conv2D(nfilters, (w1, w2), activation='relu', padding=padding, data_format=data_format)(x0)
+	x0 = Conv2D(nfilters, (w1, w2), activation='relu', padding=padding, data_format=data_format)(x0)
+	x0 = MaxPool2D((p1, p2), padding=padding, data_format=data_format)(x0)
+	return x0
+
+def Conv_Up_block(x0,nfilters,w1=3,w2=3,p1=2,p2=2,padding='same', data_format='channels_last'):
+	x0 = Conv2D(nfilters, (w1, w2), activation='relu', padding=padding, data_format=data_format)(x0)
+	x0 = Conv2D(nfilters, (w1, w2), activation='relu', padding=padding, data_format=data_format)(x0)
+	x0 = UpSampling2D((p1, p2), data_format=data_format)(x0)
+	return x0

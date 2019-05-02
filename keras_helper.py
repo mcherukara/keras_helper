@@ -115,15 +115,14 @@ def repeat_channels(test_data):
     		test_data[i,:,:],test_data[i,:,:],test_data[i,:,:]
 	return test_dataset3
 
-def plot_training_hist(history, n_last=5):
-	hist=history
-	epochs=np.asarray(history.epoch)+1
+def plot_training_hist(history, init_epoch=0, n_last=5):
+	
+	loss=history['loss']
+	val_loss=history['val_loss']
+	acc=history['acc']
+	val_acc=history['val_acc']
 
-	loss=hist.history['loss']
-	val_loss=hist.history['val_loss']
-	acc=hist.history['acc']
-	val_acc=hist.history['val_acc']
-	#n_last=30 #Last how many epochs to show in zoomed in plot
+	epochs = np.linspace(init_epoch, len(loss)+init_epoch, len(loss))
 
 	f, axarr = plt.subplots(2,2, sharex=False, figsize=(15, 6))
 
